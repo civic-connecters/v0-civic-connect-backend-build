@@ -2,8 +2,11 @@ import { createClient } from "@/lib/supabase/server"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
+  console.log("[v0] Issues API GET request received")
+
   try {
     const supabase = await createClient()
+    console.log("[v0] Supabase client created successfully")
     const { searchParams } = new URL(request.url)
 
     // Query parameters
@@ -42,6 +45,8 @@ export async function GET(request: NextRequest) {
 
     const { data: issues, error, count } = await query
 
+    console.log("[v0] Issues query executed, found:", issues?.length || 0, "issues")
+
     if (error) {
       console.error("Error fetching issues:", error)
       return NextResponse.json({ error: "Failed to fetch issues" }, { status: 500 })
@@ -57,7 +62,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error("Unexpected error:", error)
+    console.error("[v0] Issues API error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
