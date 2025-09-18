@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
     let query = supabase.from("civic_issues").select(`
         *,
         issue_categories(name, icon, color),
-        reporter:profiles!civic_issues_reporter_id_fkey(first_name, last_name, display_name),
-        assignee:profiles!civic_issues_assigned_to_fkey(first_name, last_name, display_name)
+        reporter:profiles!reporter_id(first_name, last_name, display_name),
+        assignee:profiles!assigned_to(first_name, last_name, display_name)
       `)
 
     // Apply filters
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       .select(`
         *,
         issue_categories(name, icon, color),
-        reporter:profiles!civic_issues_reporter_id_fkey(first_name, last_name, display_name)
+        reporter:profiles!reporter_id(first_name, last_name, display_name)
       `)
       .single()
 
