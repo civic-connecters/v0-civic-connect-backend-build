@@ -5,8 +5,12 @@ export async function GET(request: NextRequest) {
   console.log("[v0] Issues API GET request received")
 
   try {
+    console.log("[v0] Creating Supabase server client...")
     const supabase = await createClient()
+    console.log("[v0] SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL ? "Set" : "Not set")
+    console.log("[v0] SUPABASE_ANON_KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Set" : "Not set")
     console.log("[v0] Supabase client created successfully")
+
     const { searchParams } = new URL(request.url)
 
     // Query parameters
@@ -20,12 +24,11 @@ export async function GET(request: NextRequest) {
 
     const offset = (page - 1) * limit
 
-    // Build query
     let query = supabase.from("civic_issues").select(`
         *,
         issue_categories(name, icon, color),
-        profiles!civic_issues_reporter_id_fkey(first_name, last_name, display_name),
-        profiles!civic_issues_assigned_to_fkey(first_name, last_name, display_name)
+        reporter:profiles!reporter_id(first_name, last_name, display_name),
+        assignee:profiles!assigned_to(first_name, last_name, display_name)
       `)
 
     // Apply filters
@@ -49,7 +52,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error("Error fetching issues:", error)
-      return NextResponse.json({ error: "Failed to fetch issues" }, { status: 500 })
+      return NextResponse.json({ error: "Failed to fetch issues", details: error.message }, { status: 500 })
     }
 
     return NextResponse.json({
@@ -98,7 +101,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Title and description are required" }, { status: 400 })
     }
 
-    // Create the issue
     const { data: issue, error } = await supabase
       .from("civic_issues")
       .insert({
@@ -116,7 +118,7 @@ export async function POST(request: NextRequest) {
       .select(`
         *,
         issue_categories(name, icon, color),
-        profiles!civic_issues_reporter_id_fkey(first_name, last_name, display_name)
+        reporter:profiles!reporter_id(first_name, last_name, display_name)
       `)
       .single()
 
