@@ -26,9 +26,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase.from("civic_issues").select(`
         *,
-        issue_categories(name, icon, color),
-        reporter:profiles!reporter_id(first_name, last_name, display_name),
-        assignee:profiles!assigned_to(first_name, last_name, display_name)
+        issue_categories(name, icon, color)
       `)
 
     // Apply filters
